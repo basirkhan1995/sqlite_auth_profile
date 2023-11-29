@@ -27,8 +27,8 @@ class Profile extends StatelessWidget {
                   ),
                 ),
 
-                Text(users!.fullName??"",style: const TextStyle(fontSize: 28,color: primaryColor),),
-                Text(users!.email??"",style: const TextStyle(color: Colors.grey),),
+                Text(users!.fullName??"No Name",style: const TextStyle(fontSize: 28,color: primaryColor),),
+                Text(users!.email??"No email",style: const TextStyle(color: Colors.grey),),
                 const SizedBox(height: 15),
                 Button(label: "SIGN OUT", onTap: (){
                   Navigator.push(context, MaterialPageRoute(builder: (context)=> const LoginScreen()));
@@ -56,7 +56,7 @@ class Profile extends StatelessWidget {
                       ListTile(
                         leading: const Icon(Icons.account_circle,size: 30,),
                         title: const Text("Usrename"),
-                        subtitle: Text(users!.usrName??""),
+                        subtitle: Text(users!.fullName??""),
                       ),
                     ],
                   ),

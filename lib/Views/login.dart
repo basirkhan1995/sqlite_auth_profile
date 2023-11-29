@@ -1,10 +1,12 @@
 import 'package:authentication_profile/Components/colors.dart';
 import 'package:authentication_profile/Components/custom_button.dart';
 import 'package:authentication_profile/Components/custom_textfield.dart';
-import 'package:authentication_profile/Json/users.dart';
-import 'package:authentication_profile/Views/profile.dart';
+import 'package:authentication_profile/Provider/provider.dart';
+import 'package:authentication_profile/Views/home.dart';
 import 'package:authentication_profile/Views/signup.dart';
 import 'package:flutter/material.dart';
+import 'package:provider/provider.dart';
+import '../Json/users.dart';
 import '../SQLite/database_helper.dart';
 
 class LoginScreen extends StatefulWidget {
@@ -22,25 +24,12 @@ class _LoginScreenState extends State<LoginScreen> {
   final db = DatabaseHelper();
   bool isValid = false;
 
-  login()async{
-     var result = await db.getUser(username.text);
-    var res = await db.authenticate(Users(usrName: username.text, usrPassword: password.text));
-    if(res == true){
-      //if login is true go to profile or home
-      if(!mounted)return;
-      Navigator.push(context, MaterialPageRoute(builder: (context)=> Profile(users: result) ));
-    }else{
-      //other wise show the message
-      setState(() {
-        isValid = true;
-      });
-    }
-  }
+
 
   @override
   Widget build(BuildContext context) {
-    return Scaffold(
 
+    return Scaffold(
       body: SafeArea(
         child: Center(
           child: SingleChildScrollView(
@@ -57,23 +46,47 @@ class _LoginScreenState extends State<LoginScreen> {
 
                 const SizedBox(height: 2),
 
-                ListTile(
-                  title: const Text("Remember me"),
-                  leading: Checkbox(
-                    activeColor: primaryColor,
-                    value: isChecked,
-                    onChanged: (value){
-                      setState(() {
-                        isChecked = !isChecked;
-                      });
-                    },
-                  ),
+                Consumer<UiProvider>(
+                  builder: (context,UiProvider notifier, child) {
+                    return ListTile(
+                          horizontalTitleGap: 2,
+                          title: const Text("Remember me"),
+                          leading: Checkbox(
+                            activeColor: primaryColor,
+                            value: notifier.isChecked,
+                            onChanged: (value)=> notifier.toggleCheck(),
+                          ),
+                        );
+                  }
                 ),
 
-                Button(label: "LOGIN", onTap: (){
-                  /// LOGIN BUTTON
-                  login();
-                }),
+
+                Consumer<UiProvider>(
+                  builder: (context, UiProvider notifier, child) {
+                    return Button(
+                        label: "LOGIN",
+                        onTap: ()async{
+
+                          var result = await db.getUser(username.text);
+                          var res = await db.authenticate(Users(usrName: username.text, usrPassword: password.text));
+                          if(res == true){
+                            if(notifier.isChecked == true){
+                              //if I checked the remember me then setRemember me true,
+                              //Login session become true
+                              notifier.setRememberMe();
+                            }
+                            if(!mounted)return;
+                            Navigator.push(context, MaterialPageRoute(builder: (context)=> const HomeScreen() ));
+                          } else{
+                            //other wise show the message
+                            setState(() {
+                              isValid = true;
+                            });
+                          }
+
+                        });
+                  }
+                ),
 
                 Row(
                   mainAxisAlignment: MainAxisAlignment.center,
