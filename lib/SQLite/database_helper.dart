@@ -53,10 +53,12 @@ class DatabaseHelper{
     return res.isNotEmpty? Users.fromMap(res.first):null;
  }
 
-
-
-
-
+ //Check User Exist, if there is duplicate user, we catch the exception and show a message
+ Future<bool> checkUserExist(String username)async{
+    final Database db = await initDB();
+    final List<Map<String,dynamic>> res = await db.query("users",where: "usrName = ?", whereArgs: [username]);
+    return res.isNotEmpty;
+  }
 
 
 }

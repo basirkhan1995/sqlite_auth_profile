@@ -21,13 +21,23 @@ class _SignUpScreenState extends State<SignUpScreen> {
   final password = TextEditingController();
   final confirmPass = TextEditingController();
   final db = DatabaseHelper();
+  bool isUserExist = false;
   //TextEditing controllers gets the value from textfield and pass it to database by functions we have
   //already created in databasehelper class
   signUp()async{
-    var res = await db.createUser(Users( fullName: fullName.text, email: email.text, usrName: username.text, usrPassword: password.text));
-    if(res>0){
-      if(!mounted)return;
-      Navigator.push(context, MaterialPageRoute(builder: (context)=>const LoginScreen()));
+    bool usrExist = await db.checkUserExist(username.text);
+    //If user exists, show the message
+    if(usrExist){
+      setState(() {
+        isUserExist = true;
+      });
+    }else{
+      //otherwise create account
+      var res = await db.createUser(Users( fullName: fullName.text, email: email.text, usrName: username.text, usrPassword: password.text));
+      if(res>0){
+        if(!mounted)return;
+        Navigator.push(context, MaterialPageRoute(builder: (context)=>const LoginScreen()));
+      }
     }
   }
 
@@ -71,6 +81,12 @@ class _SignUpScreenState extends State<SignUpScreen> {
                       child: const Text("LOGIN"))
                 ],
               ),
+
+              //End
+              //Message when there is a duplicate user
+
+              //By default we hide the message
+              isUserExist? const Text("User already exists, please enter anothe name") : const SizedBox(),
 
 
             ],
